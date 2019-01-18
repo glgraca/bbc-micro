@@ -16,109 +16,101 @@
   160 .minushalfpi OPT FNEQUF(-PI/2)
   170 .halfpi OPT FNEQUF(PI/2)
   180 .ATAN2
-  190  \Copy address of Z to &50,&51
-  200  CLC
-  210 LDA &4B4
-  220 ADC #&3
-  230 STA &50
-  240 LDA &4B5
-  250 ADC #&0
-  260 STA &51
-  270 \Copy address of X to &52, &53
-  280 CLC
-  290 LDA &4B0
-  300 ADC #&3
-  310 STA &52
-  320 LDA &4B1
-  330 ADC #&0
-  340 STA &53
-  350 \Copy address of Y to &54, &55
-  360 CLC
-  370 LDA &4B2
-  380 ADC #&3
-  390 STA &54
-  400 LDA &4B3
-  410 ADC #&0
-  420 STA &55
-  430 \Load X
-  440 OPT FNMOVW(&52,&4B)
-  450 JSR aunp
-  460 JSR asign
-  470 STA &60
-  480 \Load Y
-  490 OPT FNMOVW(&54,&4B)
-  500 JSR aunp
-  510 JSR asign
-  520 STA &61
-  530 LDA &60
-  540 BNE arctan \X!=0
-  550 LDY #&0
-  560 LDX #&5
-  570 LDA &61
-  580 BPL dohalfpi \Y>0
-  590.dominushalfpi \Y<0
-  600 LDA minushalfpi,Y
-  610 STA (&50),Y
-  620 INY
-  630 DEX
-  640 BNE dominushalfpi
-  650 RTS
-  660 .dohalfpi \Y>0
-  670 LDA halfpi,Y
-  680 STA (&50),Y
-  690 INY
-  700 DEX
-  710 BNE dohalfpi
-  720 RTS
-  730 .arctan \X!=0
-  740 OPT FNMOVW(&52,&4B) \point to x
-  750 JSR aunp \fwa=x
-  760 OPT FNMOVW(&54,&4B) \point to y
-  770 JSR adiv \fwa=y/x
-  780 JSR atn  \fwa=atn(y/x)
-  790 LDA &60
-  800 BPL setz \x>=0
-  810 JSR bcopya
-  820 LDA &61
-  830 BPL addpi \y>=0
-  840.subpi
-  850 LDA #minuspi MOD &100
-  860 STA &4B
-  870 LDA #minuspi DIV &100
-  880 STA &4C
-  890 JMP doadd
-  900.addpi
-  910 LDA #pluspi MOD &100
-  920 STA &4B
-  930 LDA #pluspi DIV &100
-  940 STA &4C
-  950.doadd
-  960 JSR aunp
-  970 JSR aplusb
-  980.setz
-  990 OPT FNMOVW(&50,&4B)
- 1000 JSR apack
- 1010 RTS:]
- 1020 NEXT pass%
- 1030 X=-1
- 1040 Y=1
- 1050 CALL ATAN2
- 1060 PRINT Z
- 1070 END
- 1080 DEF FNEQUF(Z)
- 1090 I% = &3 + ?&4B4 + &100*?&4B5
- 1100 FOR J% = &1 TO &5
- 1110 ?P% = ?I%
- 1120 P% = P% + &1
- 1130 I% = I% + &1
- 1140 NEXT
- 1150 =pass%
- 1160 DEF FNMOVW(F%,T%)
- 1170 [
- 1180 OPT pass%
- 1190 LDA F%
- 1200 STA T%
- 1210 LDA F%+&1
- 1220 STA T%+&1
- 1230 ]
- 1240 =pass%
+  190 OPT FNMOVF(&4B4,&50) \Copy address of Z to &50,&51
+  200 OPT FNMOVF(&4B0,&52) \Copy address of X to &52,&53
+  210 OPT FNMOVF(&4B2,&54) \Copy address of Y to &54,&55
+  220 OPT FNMOVW(&52,&4B) \Load X
+  230 JSR aunp
+  240 JSR asign
+  250 STA &60
+  260 OPT FNMOVW(&54,&4B) \Load Y
+  270 JSR aunp
+  280 JSR asign
+  290 STA &61
+  300 LDA &60
+  310 BNE arctan \X!=0
+  320 LDY #&0
+  330 LDX #&5
+  340 LDA &61
+  350 BPL dohalfpi \Y>0
+  360.dominushalfpi \Y<0
+  370 LDA minushalfpi,Y
+  380 STA (&50),Y
+  390 INY
+  400 DEX
+  410 BNE dominushalfpi
+  420 RTS
+  430 .dohalfpi \Y>0
+  440 LDA halfpi,Y
+  450 STA (&50),Y
+  460 INY
+  470 DEX
+  480 BNE dohalfpi
+  490 RTS
+  500 .arctan \X!=0
+  510 OPT FNMOVW(&52,&4B) \point to x
+  520 JSR aunp \fwa=x
+  530 OPT FNMOVW(&54,&4B) \point to y
+  540 JSR adiv \fwa=y/x
+  550 JSR atn  \fwa=atn(y/x)
+  560 LDA &60
+  570 BPL setz \x>=0
+  580 JSR bcopya
+  590 LDA &61
+  600 BPL addpi \y>=0
+  610.subpi
+  620 OPT FNSETW(minuspi, &4B)
+  630 JMP doadd
+  640.addpi
+  650 OPT FNSETW(pluspi, &4B)
+  660.doadd
+  670 JSR aunp
+  680 JSR aplusb
+  690.setz
+  700 OPT FNMOVW(&50,&4B)
+  710 JSR apack
+  720 RTS:]
+  730 NEXT pass%
+  740 X=-1
+  750 Y=1
+  760 CALL ATAN2
+  770 PRINT Z
+  780 END
+  790 DEF FNEQUF(Z)
+  800 I% = &3 + ?&4B4 + &100*?&4B5
+  810 FOR J% = &1 TO &5
+  820 ?P% = ?I%
+  830 P% = P% + &1
+  840 I% = I% + &1
+  850 NEXT
+  860 =pass%
+  870 DEF FNMOVW(F%,T%)
+  880 [
+  890 OPT pass%
+  900 LDA F%
+  910 STA T%
+  920 LDA F%+&1
+  930 STA T%+&1
+  940 ]
+  950 =pass%
+  960 DEF FNSETW(V%,T%)
+  970 [
+  980 OPT pass%
+  990 LDA #V% MOD &100
+ 1000 STA T%
+ 1010 LDA #V% DIV &100
+ 1020 STA T%+&1
+ 1030 ]
+ 1040 =pass%
+ 1050 DEF FNMOVF(F%,T%)
+ 1060 [
+ 1070 OPT pass%
+ 1080 CLC
+ 1090 LDA F%
+ 1100 ADC #&3
+ 1110 STA T%
+ 1120 LDA F%+&1
+ 1130 ADC #&0
+ 1140 STA T%+&1
+ 1150 ]
+ 1160 =pass%
